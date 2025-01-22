@@ -106,6 +106,56 @@ function App() {
         display: true,
         text: "Chart Area",
       },
+      tooltip: {
+        enabled: false, // Disable the default tooltip
+        external: function (context) {
+          // Get the tooltip element or create it if it doesn't exist
+          let tooltipEl = document.getElementById("chartjs-tooltip");
+          if (!tooltipEl) {
+            tooltipEl = document.createElement("div");
+            tooltipEl.id = "chartjs-tooltip";
+            tooltipEl.style.position = "absolute";
+            tooltipEl.style.pointerEvents = "none";
+            tooltipEl.style.backgroundColor = "rgba(0, 119, 228, 0.9)";
+            tooltipEl.style.color = "#fff";
+            tooltipEl.style.borderRadius = "8px";
+            tooltipEl.style.width = "130px"; // Fixed width
+            tooltipEl.style.height = "65px"; // Fixed height
+            tooltipEl.style.padding = "10px";
+            tooltipEl.style.fontSize = "14px";
+            tooltipEl.style.textAlign = "center";
+            tooltipEl.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
+            document.body.appendChild(tooltipEl);
+          }
+
+          // Hide if no tooltip is active
+          const tooltipModel = context.tooltip;
+          console.log(tooltipModel);
+          if (tooltipModel.opacity === 0) {
+            tooltipEl.style.opacity = 0;
+            return;
+          }
+
+          // Set tooltip content
+          if (tooltipModel.body) {
+            const title = tooltipModel.dataPoints[0].raw;
+            const bodyLines = tooltipModel.title || [];
+
+            let innerHtml = `<div style="font-size: 18px; font-weight: bold;">${title}</div>`;
+            bodyLines.forEach((body) => {
+              innerHtml += `<div style="font-size: 12px; margin-top: 5px;">${body}</div>`;
+            });
+
+            tooltipEl.innerHTML = innerHtml;
+          }
+
+          // Position the tooltip
+          const { offsetLeft, offsetTop } = context.chart.canvas;
+          tooltipEl.style.left = offsetLeft + tooltipModel.caretX + "px";
+          tooltipEl.style.top = offsetTop + tooltipModel.caretY + "px";
+          tooltipEl.style.opacity = 1;
+        },
+      },
     },
   };
 

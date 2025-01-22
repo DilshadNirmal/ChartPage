@@ -107,6 +107,60 @@ const CandleStickChart = ({ chartData }) => {
         display: true,
         text: "Candlestick Chart (Users Data)",
       },
+      tooltip: {
+        enabled: false, // Disable the default tooltip
+        external: function (context) {
+          // Get the tooltip element or create it if it doesn't exist
+          let tooltipEl = document.getElementById("chartjs-tooltip");
+          if (!tooltipEl) {
+            tooltipEl = document.createElement("div");
+            tooltipEl.id = "chartjs-tooltip";
+            tooltipEl.style.position = "absolute";
+            tooltipEl.style.pointerEvents = "none";
+            tooltipEl.style.backgroundColor = "rgba(0, 119, 228, 0.9)";
+            tooltipEl.style.color = "#fff";
+            tooltipEl.style.borderRadius = "8px";
+            tooltipEl.style.padding = "10px";
+            tooltipEl.style.fontSize = "14px";
+            tooltipEl.style.textAlign = "left"; // Better alignment for multiple lines
+            tooltipEl.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
+            document.body.appendChild(tooltipEl);
+          }
+
+          // Hide if no tooltip is active
+          const tooltipModel = context.tooltip;
+          if (tooltipModel.opacity === 0) {
+            tooltipEl.style.opacity = 0;
+            return;
+          }
+
+          // Set tooltip content
+          if (tooltipModel.body) {
+            const dataPoint = tooltipModel.dataPoints[0].raw; // Raw data (OHLC data)
+            const { o, h, l, c, x } = dataPoint; // Extract OHLC and label values
+
+            tooltipEl.innerHTML = `
+      <div style="font-size: 16px; font-weight: bold;">Closing: ${c}</div>
+      <div style="font-size: 14px;">
+        Open: ${o} <br/>
+        High: ${h} <br/>
+        Low: ${l} <br/>
+        Date: ${x}
+      </div>
+    `;
+          }
+
+          // Adjust tooltip dimensions dynamically
+          tooltipEl.style.width = "auto"; // Automatically adjust width based on content
+          tooltipEl.style.height = "auto"; // Automatically adjust height based on content
+
+          // Position the tooltip
+          const { offsetLeft, offsetTop } = context.chart.canvas;
+          tooltipEl.style.left = offsetLeft + tooltipModel.caretX + "px";
+          tooltipEl.style.top = offsetTop + tooltipModel.caretY + "px";
+          tooltipEl.style.opacity = 1;
+        },
+      },
     },
     scales: {
       x: {
